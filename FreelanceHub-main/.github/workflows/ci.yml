@@ -1,0 +1,84 @@
+name: FreelanceHub CI
+
+on:
+  push:
+    branches:
+      - main
+      - "fix/**"
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend checks
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: freelancehub
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d freelancehub"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install backend dependencies
+        run: npm install --include=dev
+      - name: Audit backend dependencies
+        run: npm audit --audit-level=high
+      - name: Generate Prisma Client
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/freelancehub
+          DIRECT_URL: postgresql://ci:ci@localhost:5432/freelancehub
+        run: npx prisma generate
+      - name: Check backend JavaScript syntax
+        run: npm run check:syntax
+      - name: Initialize disposable integration database
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/freelancehub?schema=public
+          DIRECT_URL: postgresql://postgres:postgres@localhost:5432/freelancehub?schema=public
+        run: npx prisma db push
+      - name: Run backend unit tests
+        run: npm test
+      - name: Run API and real-time integration tests
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/freelancehub?schema=public
+        run: npm run test:integration
+
+  frontend:
+    name: Frontend production build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install frontend dependencies
+        run: npm install
+      - name: Audit frontend dependencies
+        run: npm audit --audit-level=high
+      - name: Build frontend
+        run: npm run build

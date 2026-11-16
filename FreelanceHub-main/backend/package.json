@@ -1,0 +1,40 @@
+{
+  "name": "freelancehub-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "node prisma/seed.js",
+    "studio": "prisma studio",
+    "test": "node --test",
+    "check:syntax": "node --check src/server.js && node --check src/middleware/auth.js && node --check src/routes/auth.js && node --check src/routes/users.js && node --check src/routes/projects.js && node --check src/routes/proposals.js && node --check src/routes/contracts.js && node --check src/routes/teams.js && node --check src/routes/communication.js && node --check src/routes/notifications.js && node --check src/routes/reviews.js && node --check src/routes/dashboard.js && node --check src/routes/admin.js && node --check src/routes/smartmatch.js && node --check src/utils/http.js && node --check src/utils/trustScore.js && node --check src/utils/smartMatch.js && node --check src/utils/validation.js && node --check prisma/seed.js",
+    "test:integration": "node --test test/integration.test.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "bcryptjs": "^3.0.2",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prisma": "^6.19.0",
+    "socket.io-client": "^4.8.1"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.2",
+    "minimatch": "^11.0.1"
+  }
+}
